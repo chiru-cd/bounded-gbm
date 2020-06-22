@@ -12,9 +12,6 @@ test = pd.read_csv("data/test.csv")
 X_y_train = xgb.DMatrix(data=train[['Pclass', 'Age', 'Fare', 'SibSp', 'Parch']], label= train['Survived'])
 X_test    = xgb.DMatrix(data=test[['Pclass', 'Age', 'Fare', 'SibSp', 'Parch']])
 
-#print(train.head())
-#print(train[["Age", "Fare"]].describe())
-
 params = {
           'base_score': np.mean(train['Survived']),
           'eta':  0.1,
@@ -24,7 +21,4 @@ params = {
           'eval_metric' :'mae'
          }
 model = xgb.train(params=params, dtrain=X_y_train, num_boost_round=3)
-
-# if hasattr(model, 'feature_names'): model.set_attr(feature_names = '|'.join(model.feature_names))
-# model.save_model('0003.model')
 pickle.dump(model, open("test.dat", "wb"))
