@@ -26,3 +26,5 @@ def split(filehandler, delimiter=',', row_limit=500000,
             if keep_headers:
                 current_out_writer.writerow(headers)
         current_out_writer.writerow(row)
+
+split(open("data/loan.csv", 'r'))
