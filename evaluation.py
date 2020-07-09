@@ -4,25 +4,34 @@ import xgboost as xgb
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
 
-def get_reason(test, bounds):
+def set_reason(test, bounds):
     columns = list(bounds)
-    reason = pd.DataFrame()
+
     for i in columns:
         low = bounds[i][0]
         high = bounds[i][1]
-        reason.loc[(test[i] < low), i] = "low_" + str(low-test[i])
-        reason.loc[(test[i] > high), i] = "high_" + str(test[i]-high)
-        reason.loc[(test[i] >= low) & (test[i] <= high), i] = 0
+        test.loc[(test[i] < low), "bound_"+i] = "low_" + str(low-test[i])
+        test.loc[(test[i] > high), "bound_"+i] = "high_" + str(test[i]-high)
+        test.loc[(test[i] >= low) & (test[i] <= high), "bound_"+i] = 0
+    return test
+
+def get_reason_matrix(test, bounds):
+    test = set_reason(test, bounds)
+    columns = list(bounds)
+    reason = pd.DataFrame()
     
+    for i in columns:
+        reason[i] = test["bound_"+i]
     return reason
 
 def get_result(test, bounds):
     columns = list(bounds)
-    reason = get_reason(test, bounds)
+    reason = set_reason(test, bounds)
     test['unbound'] = 0
-    for i in columns:
-        test['unbound'] = np.where(isinstance(reason[i], str), test['unbound']+1, test['unbound'])
     
+    for i in columns:
+        test['unbound'] = np.where(test["bound_"+i]==0, test['unbound'], test['unbound']+1)
+        test.pop("bound_"+i)
     return test
 
 def evaluate(test, model, bounds):
@@ -34,7 +43,7 @@ def evaluate(test, model, bounds):
     print (roc_auc_score(y_test0, preds0))
 
     test = get_result(test, bounds)
-    test = test[test['unbound']!=0]
+    test = test[test['unbound']==0]
     test.pop('unbound')
 
     y_test = test.pop('class')

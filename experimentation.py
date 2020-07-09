@@ -15,5 +15,5 @@ def experiment(base, model, feature):
 
 def get_bounds(base, model, feature):
     experiment(base, model, feature)
-    bound_i = pd.Series()
+    bound_i = pd.Series([1.2*base[feature].min(), 0.8*base[feature].max()])
     return bound_i
