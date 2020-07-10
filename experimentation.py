@@ -12,8 +12,15 @@ def experiment(base, model, feature):
     pred.sort_values(feature, inplace = True)
     pred.plot(x=feature, y='preds')
     plt.show()
+    return pred
 
 def get_bounds(base, model, feature):
-    experiment(base, model, feature)
-    bound_i = pd.Series([1.2*base[feature].min(), 0.8*base[feature].max()])
+    df = experiment(base, model, feature)
+    df['preds_diff'] = df['preds'].diff()
+    indices = df.index[df['preds_diff'] != 0].tolist()
+    lowi = indices[1]
+    highi = indices[-1]
+    low = df.at[lowi, feature]
+    high = df.at[highi, feature]
+    bound_i = pd.Series([low, high])
     return bound_i

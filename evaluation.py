@@ -8,8 +8,8 @@ def set_reason(test, bounds):
     columns = list(bounds)
 
     for i in columns:
-        low = bounds[i][0]
-        high = bounds[i][1]
+        low = bounds.at[0, i]
+        high = bounds.at[1, i]
         test.loc[(test[i] < low), "bound_"+i] = "low_" + str(low-test[i])
         test.loc[(test[i] > high), "bound_"+i] = "high_" + str(test[i]-high)
         test.loc[(test[i] >= low) & (test[i] <= high), "bound_"+i] = 0

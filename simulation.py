@@ -2,20 +2,24 @@ import pandas as pd
 import numpy as np
 
 def simulate(base, train, feature):
-    ser1 = train.sample(n = 5000)[feature]
+    ser1 = train.sample(n = 25000)[feature]
     min_val = train[feature].min()
     max_val = train[feature].max()
     mean_val = train[feature].mean()
     median_val = train[feature].median()
     diff = (max_val - min_val)/10
-    ser2 = pd.Series (np.random.randint(min_val-diff, min_val, size=2500))
-    ser3 = pd.Series (np.random.randint(max_val, max_val+diff, size=2500))
+
+    for j in range(10):
+        low = pd.Series (np.random.randint(min_val-(j+1)*diff, min_val-(j)*diff, size=1250))
+        high = pd.Series (np.random.randint(max_val+(j)*diff, max_val+(j+1)*diff, size=1250))
     # ser2 = train[(train[feature] < train[feature].quantile(0.5))].sample(n=2500)[feature]
     # ser3 = train[(train[feature] > train[feature].quantile(0.5))].sample(n=2500)[feature]
     # ser2 = ser2.apply(lambda x: x - (ser2.max()-min_val))
     # ser3 = ser3.apply(lambda x: x + (max_val-ser3.min()))
-    result = ser1.append([ser2, ser3], ignore_index = True)
-    base[feature] = result
+        ser1 = ser1.append([low, high], ignore_index = True)
+    
+    ser1.sort_values(inplace = True, ignore_index = True)
+    base[feature] = ser1
     return base
 
     # a = [0] * 32
