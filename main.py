@@ -15,20 +15,24 @@ import evaluation as ev
 
 # Make sure the model & data files are in the working directory
 # input model
-model_in = input ("Enter model file (.dat) ")
-# input training data
-data_in = input ("Enter training data file (.csv) ")
-# input testing data
-data_in2 = input ("Enter testing data file (.csv) ")
-# input feature count
-feat_count = int( input ("Enter no. of features ") )
-
-# loading data
-train = pd.read_csv(data_in)
-test = pd.read_csv(data_in2)
-
+# model_in = input ("Enter model file (.dat) ")
+model_in = "model.dat"
 # loading model
 model = pickle.load(open(model_in, "rb"))
+
+# input training data
+# data_in = input ("Enter training data file (.csv) ")
+data_in = "dev.csv"
+# loading data
+train = pd.read_csv(data_in)
+
+# input testing data
+# data_in2 = input ("Enter testing data file (.csv) ")
+data_in2 = "loan_2018Q2.csv"
+test = pd.read_csv(data_in2)
+
+# input feature count
+feat_count = int( input ("Enter no. of features ") )
 
 # getting 'n' most important features
 def subdict (count):

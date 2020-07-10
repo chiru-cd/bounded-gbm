@@ -10,8 +10,8 @@ def experiment(base, model, feature):
     pred[feature] = base[feature]
     pred['preds'] = model.predict(X_test)
     pred.sort_values(feature, inplace = True)
-    pred.plot(x=feature, y='preds')
-    plt.show()
+    # pred.plot(x=feature, y='preds')
+    # plt.show()
     return pred
 
 def get_bounds(base, model, feature):

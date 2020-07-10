@@ -14,7 +14,7 @@ l2 = pd.read_csv("loan_2019Q2.csv")
 l3 = pd.read_csv("loan_2019Q3.csv")
 l4 = pd.read_csv("loan_2018Q4.csv")
 loan = l1.append([l2,l3,l4], ignore_index=True)
-loan.to_csv("dev.csv", index=False)
+# loan.to_csv("dev.csv", index=False)
 train = loan
 test = l4
 y_train = train.pop('class')
@@ -32,8 +32,7 @@ params = {
           'eta': 0.1,
           'max_depth': 5,
           'gamma' :3,
-          'objective'   :'binary:logistic',
-          'eval_metric' :'auc'
+          'objective' :'binary:logistic',
          }
 
 model = xgb.train(params=params, dtrain=X_y_train, num_boost_round=500)

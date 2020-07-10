@@ -2,8 +2,7 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_auc_score
-
+from sklearn.metrics import roc_auc_score, mean_squared_error, log_loss
 def set_reason(test, bounds):
     columns = list(bounds)
 
@@ -40,7 +39,9 @@ def evaluate(test, model, bounds):
     X_y_test0 = xgb.DMatrix(data=test0)
 
     preds0 =  model.predict(X_y_test0)
-    print (roc_auc_score(y_test0, preds0))
+    auc_orig = (roc_auc_score(y_test0, preds0))
+    mse_orig = (mean_squared_error(y_test0, preds0))
+    log_orig = (log_loss(y_test0, preds0))
 
     test = get_result(test, bounds)
     test = test[test['unbound']==0]
@@ -50,4 +51,10 @@ def evaluate(test, model, bounds):
     X_y_test = xgb.DMatrix(data=test)
 
     preds =  model.predict(X_y_test)
-    print (roc_auc_score(y_test, preds))
+    auc_new = (roc_auc_score(y_test, preds))
+    mse_new = (mean_squared_error(y_test, preds))
+    log_new = (log_loss(y_test, preds))
+    
+    print ("AUC score:", ((auc_new-auc_orig)/auc_orig)*100,"%")
+    print ("Mean Squared Error:", ((mse_new-mse_orig)/mse_orig)*100,"%")
+    print ("Neg Log Loss:", ((log_new-log_orig)/log_orig)*100,"%")

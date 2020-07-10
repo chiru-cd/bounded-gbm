@@ -12,10 +12,10 @@ def simulate(base, train, feature):
     for j in range(10):
         low = pd.Series (np.random.randint(min_val-(j+1)*diff, min_val-(j)*diff, size=1250))
         high = pd.Series (np.random.randint(max_val+(j)*diff, max_val+(j+1)*diff, size=1250))
-    # ser2 = train[(train[feature] < train[feature].quantile(0.5))].sample(n=2500)[feature]
-    # ser3 = train[(train[feature] > train[feature].quantile(0.5))].sample(n=2500)[feature]
-    # ser2 = ser2.apply(lambda x: x - (ser2.max()-min_val))
-    # ser3 = ser3.apply(lambda x: x + (max_val-ser3.min()))
+        # low = train[(train[feature] < train[feature].quantile(0.5))].sample(n=2500)[feature]
+        # high = train[(train[feature] > train[feature].quantile(0.5))].sample(n=2500)[feature]
+        # low = low.apply(lambda x: x - (low.max()-min_val))
+        # high = high.apply(lambda x: x + (max_val-high.min()))
         ser1 = ser1.append([low, high], ignore_index = True)
     
     ser1.sort_values(inplace = True, ignore_index = True)
