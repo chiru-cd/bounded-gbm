@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_auc_score, mean_squared_error, log_loss
+from sklearn.metrics import roc_auc_score, mean_squared_error, log_loss, accuracy_score, precision_score, recall_score, confusion_matrix
 def set_reason(test, bounds):
     columns = list(bounds)
 
@@ -43,10 +43,29 @@ def evaluate(test, model, bounds):
     mse_orig = (mean_squared_error(y_test0, preds0))
     log_orig = (log_loss(y_test0, preds0))
 
-    test = get_result(test, bounds)
-    test = test[test['unbound']==0]
+    testu = get_result(test, bounds)
+    test = testu[testu['unbound']==0]
+    testu = testu[testu['unbound']>0]
+    
     test.pop('unbound')
+    testu.pop('unbound')
+    
+    y_testu = testu.pop('class')
+    X_y_testu = xgb.DMatrix(data=testu)
 
+    predsu =  model.predict(X_y_testu)
+
+    tn, fp, fn, tp = confusion_matrix(y_testu, predsu.round()).ravel()
+    print ("In unbounded, tn =",tn,"fp =",fp,"fn =",fn,"tp =",tp)
+    acc_u = accuracy_score(y_testu, predsu.round())
+    pre_u = precision_score(y_testu, predsu.round())
+    rec_u = recall_score(y_testu, predsu.round())
+
+    # print("In", len(testu), "unbound records,", acc_u,"were correctly classified")
+    print("Accuracy of unbounded:", acc_u)
+    print("Precision of unbounded:", pre_u)
+    print("Recall of unbounded:", rec_u)
+    
     y_test = test.pop('class')
     X_y_test = xgb.DMatrix(data=test)
 
