@@ -49,5 +49,6 @@ bounds = pd.DataFrame()
 for i in featdict:
     based = simulate(base, train, i)
     bounds[i] = get_bounds(based, model, i)
-    
-ev.evaluate(test, model, bounds)
+
+ev.eval_bound(train, model, bounds)
+# ev.evaluate(test, model, bounds)

@@ -3,24 +3,73 @@ import numpy as np
 import xgboost as xgb
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score, mean_squared_error, log_loss, accuracy_score, precision_score, recall_score, confusion_matrix
+from initialisation import createBase
+
+def eval_bound(train, model, bounds):
+    columns = list(bounds)
+    result = pd.DataFrame()
+    for i in columns:
+        base = createBase(train)
+        base = base.sample(n=5000)
+        low = bounds.at[0, i]
+        high = bounds.at[1, i]
+        min_val = train[i].min()
+        max_val = train[i].max()
+        diff = (max_val - min_val)/10
+        a = [0] * 20
+        b = [0] * 20
+
+        for j in range(20):
+            low_range = pd.Series(np.random.randint(low-(j+1)*diff, low-1-(j)*diff, size=5000))
+            base[i] = low_range.values
+            X_test = xgb.DMatrix(data = base)
+            a[j] = np.mean(model.predict(X_test))
+
+            if j==0:
+                base["preds"] = model.predict(X_test)
+                base.sort_values(i, inplace = True)
+                base.plot.scatter(x=i, y='preds')
+                plt.show()
+                base.pop('preds')
+
+            high_range = pd.Series(np.random.randint(high+1+(j)*diff, high+(j+1)*diff, size=5000))
+            base[i] = high_range.values
+            X_test = xgb.DMatrix(data = base)        
+            b[j] = np.mean(model.predict(X_test))
+
+        result[i+"_low"] = pd.Series(a)
+        result[i+"_high"] = pd.Series(b)
+    
+    print(result)
+
 def set_reason(test, bounds):
     columns = list(bounds)
 
     for i in columns:
         low = bounds.at[0, i]
         high = bounds.at[1, i]
-        test.loc[(test[i] < low), "bound_"+i] = "low_" + str(low-test[i])
-        test.loc[(test[i] > high), "bound_"+i] = "high_" + str(test[i]-high)
+        test.loc[(test[i] < low) | (test[i] > high), "bound_"+i] = 1
         test.loc[(test[i] >= low) & (test[i] <= high), "bound_"+i] = 0
     return test
 
 def get_reason_matrix(test, bounds):
-    test = set_reason(test, bounds)
     columns = list(bounds)
     reason = pd.DataFrame()
-    
+
     for i in columns:
-        reason[i] = test["bound_"+i]
+        low = bounds.at[0, i]
+        high = bounds.at[1, i]
+        mid = (low+high)/2
+
+        test.loc[(test[i] < mid), "boundary_"+i] = "low"
+        test.loc[(test[i] < mid), "margin_"+i] = test[i]-low
+        test.loc[(test[i] >= mid), "boundary_"+i] = "high"
+        test.loc[(test[i] >= mid), "margin_"+i] = high-test[i]
+        
+        reason["boundary_"+i] = test["boundary_"+i]
+        reason["margin_"+i] = test["margin_"+i]
+        test.pop("boundary_"+i)
+        test.pop("margin_"+i)
     return reason
 
 def get_result(test, bounds):
