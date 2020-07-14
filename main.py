@@ -6,6 +6,7 @@ import xgboost as xgb
 import matplotlib.pyplot as plt
 import pickle
 import operator
+import configparser
 from sklearn.metrics import roc_auc_score
 
 from initialisation import createBase
@@ -13,42 +14,74 @@ from simulation import simulate
 from experimentation import get_bounds
 import evaluation as ev
 
-# Make sure the model & data files are in the working directory
+config = configparser.ConfigParser()
+
+# config['default'] = {
+#         "host" : "192.168.1.1",
+#         "port" : "22",
+#         "username" : "username",
+#         "password" : "password"
+#     }
+
+# with open('configuration.ini', 'w') as configfile:
+#     config.write(configfile)
+
+config.read('configuration.ini')
+
 # input model
-# model_in = input ("Enter model file (.dat) ")
-model_in = "model.dat"
+model_in = config['USER'].get('model')
 # loading model
 model = pickle.load(open(model_in, "rb"))
 
 # input training data
-# data_in = input ("Enter training data file (.csv) ")
-data_in = "dev.csv"
-# loading data
-train = pd.read_csv(data_in)
+train_in = config['USER'].get('train')
+# loading train data
+train = pd.read_csv(train_in)
 
-# input testing data
-# data_in2 = input ("Enter testing data file (.csv) ")
-data_in2 = "loan_2018Q2.csv"
-test = pd.read_csv(data_in2)
+# check if explicit features provided
+d = model.get_fscore()
+if config.has_option('USER', 'features')==False:
+    feat_count = config['USER'].getint('feat_count')
 
-# input feature count
-feat_count = int( input ("Enter no. of features ") )
+    # getting 'n' most important features
+    featdict = dict(sorted(d.items(), key=operator.itemgetter(1), reverse=True)[:feat_count])
 
-# getting 'n' most important features
-def subdict (count):
-    d = model.get_fscore()
-    sorted_d = dict(sorted(d.items(), key=operator.itemgetter(1), reverse=True)[:count])
-    return sorted_d
+else:
+    featdict = [x.strip() for x in config['USER'].get('features').split(',')]
+    featdict = [i for i in featdict if i in d]
 
-featdict = subdict(feat_count)
+# check if explicit bounds provided
+if config.has_option('USER', 'bounds')==False:
+    base = createBase(train)
+    bounds = pd.DataFrame()
 
-base = createBase(train)
+    for i in featdict:
+        based = simulate(base, train, i)
+        bounds[i] = get_bounds(based, model, i)
 
-bounds = pd.DataFrame()
+    # option to get boundary values
+    if config['USER'].getboolean('get_bounds')==True:
+        bounds.to_json("bounds.json")
 
-for i in featdict:
-    based = simulate(base, train, i)
-    bounds[i] = get_bounds(based, model, i)
+else:
+    bound_in = config['USER'].get('bounds')
+    bounds = pd.read_json(bound_in)
 
-ev.eval_bound(train, model, bounds)
-# ev.evaluate(test, model, bounds)
+# check if test dataset is provided
+if config.has_option('USER', 'test')==True:
+    # input testing data
+    test_in = config['USER'].get('test')
+    # loading test data
+    test = pd.read_csv(test_in)
+
+    eval_flags = [x.strip() for x in config['USER'].get('eval_flags').split(',')]
+
+    for i in eval_flags:
+        if i=="eval_bound":
+            ev.eval_bound(train, model, bounds)
+        elif i=="result":
+            ev.get_result(test, bounds).to_csv("result.csv")
+        elif i=="reason":
+            ev.get_reason_matrix(test, bounds).to_excel("reason.xlsx")
+        elif i=="eval_tool":
+            ev.evaluate(test, model, bounds)
