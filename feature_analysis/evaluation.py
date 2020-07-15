@@ -3,7 +3,7 @@ import numpy as np
 import xgboost as xgb
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score, mean_squared_error, log_loss, accuracy_score, precision_score, recall_score, confusion_matrix
-from initialisation import createBase
+from feature_analysis.initialisation import createBase
 
 def eval_bound(train, model, bounds):
     columns = list(bounds)
@@ -33,7 +33,7 @@ def eval_bound(train, model, bounds):
         result[i+"_low"] = pd.Series(a)
         result[i+"_high"] = pd.Series(b)
     
-    result.to_excel("Boundary_evaluation.xlsx")
+    return result
 
 def set_reason(test, bounds):
     columns = list(bounds)

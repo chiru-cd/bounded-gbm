@@ -5,18 +5,27 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 import pickle
+import os
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
-l1 = pd.read_csv("loan_2019Q1.csv")
-l2 = pd.read_csv("loan_2019Q2.csv")
-l3 = pd.read_csv("loan_2019Q3.csv")
-l4 = pd.read_csv("loan_2018Q4.csv")
-loan = l1.append([l2,l3,l4], ignore_index=True)
+data_in = input ("Enter processed training data file")
+path = os.getcwd()
+loan = pd.read_csv(os.path.abspath(os.path.join(path, '..'))+'/'+data_in)
+
+data_in2 = input ("Enter processed testing data file")
+path = os.getcwd()
+loan_test = pd.read_csv(os.path.abspath(os.path.join(path, '..'))+'/'+data_in2)
+
+# l1 = pd.read_csv("loan_2019Q1.csv")
+# l2 = pd.read_csv("loan_2019Q2.csv")
+# l3 = pd.read_csv("loan_2019Q3.csv")
+# l4 = pd.read_csv("loan_2018Q4.csv")
+# loan = l1.append([l2,l3,l4], ignore_index=True)
 # loan.to_csv("dev.csv", index=False)
 train = loan
-test = l4
+test = loan_test
 y_train = train.pop('class')
 X_train = train
 y_test = test.pop('class')
@@ -40,4 +49,4 @@ model = xgb.train(params=params, dtrain=X_y_train, num_boost_round=500)
 preds =  model.predict(X_y_test)
 
 print (roc_auc_score(y_test, preds))
-pickle.dump(model, open("model.dat", "wb"))
+pickle.dump(model, open("../model.dat", "wb"))

@@ -1,3 +1,5 @@
+# git rm -r --cached data
+
 # Currently, the DMLC data parser cannot parse CSV files with headers. Use Pandas to
 # read CSV files with headers.
 import pandas as pd

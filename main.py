@@ -9,10 +9,10 @@ import operator
 import configparser
 from sklearn.metrics import roc_auc_score
 
-from initialisation import createBase
-from simulation import simulate
-from experimentation import get_bounds
-import evaluation as ev
+from feature_analysis.initialisation import createBase
+from feature_analysis.simulation import simulate
+from feature_analysis.experimentation import get_bounds
+import feature_analysis.evaluation as ev
 
 config = configparser.ConfigParser()
 
@@ -78,7 +78,7 @@ if config.has_option('USER', 'test')==True:
 
     for i in eval_flags:
         if i=="eval_bound":
-            ev.eval_bound(train, model, bounds)
+            ev.eval_bound(train, model, bounds).to_excel("Boundary_evaluation.xlsx")
         elif i=="result":
             ev.get_result(test, bounds).to_csv("result.csv")
         elif i=="reason":
