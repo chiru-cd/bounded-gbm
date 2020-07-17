@@ -37,5 +37,5 @@ These instructions will get you a copy of the project up and running on your loc
 ## Running Tool
 
 * Modify `configuration.ini` according to your requirements.
-> **Do NOT change the DEFAULT section**
+> ***Do NOT change the DEFAULT section***
 * Run `main.py` script to get result according to `eval_flags` set.

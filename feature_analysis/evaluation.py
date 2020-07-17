@@ -102,7 +102,7 @@ def evaluate(test, model, bounds):
     predsu =  model.predict(X_y_testu)
 
     tnu, fpu, fnu, tpu = confusion_matrix(y_testu, predsu.round()).ravel()
-    print ("In unbounded, tn =",tnu,"fp =",fpu,"fn =",fnu,"tp =",tpu)
+    # print ("In unbounded, tn =",tnu,"fp =",fpu,"fn =",fnu,"tp =",tpu)
     acc_u = accuracy_score(y_testu, predsu.round())
     pre_u = precision_score(y_testu, predsu.round())
     rec_u = recall_score(y_testu, predsu.round())
@@ -128,7 +128,7 @@ def evaluate(test, model, bounds):
     fp_new = fpb/len(test0)
 
     print ("AUC score:", ((auc_new-auc_orig)/auc_orig)*100,"%")
-    print ("Mean Squared Error:", ((mse_new-mse_orig)/mse_orig)*100,"%")
-    print ("Precision:", ((pre_new-pre_orig)/pre_orig)*100,"%")
+    # print ("Mean Squared Error:", ((mse_new-mse_orig)/mse_orig)*100,"%")
+    # print ("Precision:", ((pre_new-pre_orig)/pre_orig)*100,"%")
     print ("False positive rate:", ((fp_new-fp_orig)/fp_orig)*100,"%")
     print ("Neg Log Loss:", ((log_new-log_orig)/log_orig)*100,"%")
