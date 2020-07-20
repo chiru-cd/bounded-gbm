@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 
 def experiment(base, model, feature):
     X_test = xgb.DMatrix(data = base)
+    base.plot(y=[feature, "out_prncp", "loan_amnt"])
     pred = pd.DataFrame(columns = [feature, 'preds'])
 
     pred[feature] = base[feature]
     pred['preds'] = model.predict(X_test)
-    pred.sort_values(feature, inplace = True, ignore_index = True)
+    # pred.sort_values(feature, inplace = True, ignore_index = True)
     # pred.plot(x=feature, y='preds')
     # plt.show()
     return pred

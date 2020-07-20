@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 def simulate(base, train, feature):
+    base_copy = base.copy()
     ser1 = train.sample(n = 25000)[feature]
     min_val = train[feature].min()
     max_val = train[feature].max()
@@ -19,8 +20,8 @@ def simulate(base, train, feature):
         ser1 = ser1.append([low, high], ignore_index = True)
     
     ser1.sort_values(inplace = True, ignore_index = True)
-    base[feature] = ser1
-    return base
+    base_copy[feature] = ser1
+    return base_copy
 
     # a = [0] * 32
     # b = [0] * 32

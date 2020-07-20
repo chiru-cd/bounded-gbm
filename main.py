@@ -9,7 +9,7 @@ import operator
 import configparser
 from sklearn.metrics import roc_auc_score
 
-from feature_analysis.initialisation import createBase
+from feature_analysis.initialisation import multivar, createBase
 from feature_analysis.simulation import simulate
 from feature_analysis.experimentation import get_bounds
 import feature_analysis.evaluation as ev
@@ -52,7 +52,18 @@ else:
 
 # check if explicit bounds provided
 if config.has_option('USER', 'bounds')==False:
-    base = createBase(train)
+    poslist = []
+    neglist = []
+
+    if config.has_option('USER', 'pos_var')==True:
+        poslist = [x.strip() for x in config['USER'].get('pos_var').split(',')]
+        poslist = [i for i in poslist if i in d]
+    
+    if config.has_option('USER', 'neg_var')==True:
+        neglist = [x.strip() for x in config['USER'].get('neg_var').split(',')]
+        neglist = [i for i in neglist if i in d]
+
+    base = multivar(train, poslist, neglist)
     bounds = pd.DataFrame()
 
     for i in featdict:

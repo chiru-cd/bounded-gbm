@@ -95,17 +95,18 @@ def evaluate(test, model, bounds):
     testb = test[test['unbound']==0]
     
     # unbounded records
-    testu.pop('unbound')
-    y_testu = testu.pop('class')
-    X_y_testu = xgb.DMatrix(data=testu)
+    if len(testu) > 0:
+        testu.pop('unbound')
+        y_testu = testu.pop('class')
+        X_y_testu = xgb.DMatrix(data=testu)
 
-    predsu =  model.predict(X_y_testu)
+        predsu =  model.predict(X_y_testu)
 
-    tnu, fpu, fnu, tpu = confusion_matrix(y_testu, predsu.round()).ravel()
-    # print ("In unbounded, tn =",tnu,"fp =",fpu,"fn =",fnu,"tp =",tpu)
-    acc_u = accuracy_score(y_testu, predsu.round())
-    pre_u = precision_score(y_testu, predsu.round())
-    rec_u = recall_score(y_testu, predsu.round())
+        tnu, fpu, fnu, tpu = confusion_matrix(y_testu, predsu.round()).ravel()
+        # print ("In unbounded, tn =",tnu,"fp =",fpu,"fn =",fnu,"tp =",tpu)
+        acc_u = accuracy_score(y_testu, predsu.round())
+        pre_u = precision_score(y_testu, predsu.round())
+        rec_u = recall_score(y_testu, predsu.round())
 
     # print("In", len(testu), "unbound records,", acc_u,"were correctly classified")
     # print("Accuracy of unbounded:", acc_u)
