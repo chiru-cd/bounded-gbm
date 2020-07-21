@@ -3,11 +3,9 @@ import numpy as np
 
 def simulate(base, train, feature):
     base_copy = base.copy()
-    ser1 = train.sample(n = 25000)[feature]
+    ser1 = train.sample(n = 25000, replace=True)[feature]
     min_val = train[feature].min()
     max_val = train[feature].max()
-    mean_val = train[feature].mean()
-    median_val = train[feature].median()
     diff = (max_val - min_val)/10
 
     for j in range(10):

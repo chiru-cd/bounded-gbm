@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import xgboost as xgb
+import sys
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score, mean_squared_error, log_loss, accuracy_score, precision_score, recall_score, confusion_matrix
 from feature_analysis.initialisation import createBase
@@ -78,10 +79,17 @@ def get_result(test, bounds):
 def evaluate(test, model, bounds):
     # original test dataset
     test0 = test.copy()
-    y_test0 = test0.pop('class')
-    X_y_test0 = xgb.DMatrix(data=test0)
-    preds0 =  model.predict(X_y_test0)
-
+    try:
+        y_test0 = test0.pop('class')
+    except:
+        sys.exit("Target variable should be named 'class' in test dataset")
+    
+    try:
+        X_y_test0 = xgb.DMatrix(data=test0)
+        preds0 =  model.predict(X_y_test0)
+    except:
+        sys.exit ("Training data and model features mismatch")
+    
     tn0, fp0, fn0, tp0 = confusion_matrix(y_test0, preds0.round()).ravel()
 
     auc_orig = (roc_auc_score(y_test0, preds0))
@@ -111,10 +119,10 @@ def evaluate(test, model, bounds):
         pre_u = precision_score(y_testu, predsu.round())
         rec_u = recall_score(y_testu, predsu.round())
 
-    # print("In", len(testu), "unbound records,", acc_u,"were correctly classified")
-    # print("Accuracy of unbounded:", acc_u)
-    # print("Precision of unbounded:", pre_u)
-    # print("Recall of unbounded:", rec_u)
+        # print("In", len(testu), "unbound records,", acc_u,"were correctly classified")
+        # print("Accuracy of unbounded:", acc_u)
+        # print("Precision of unbounded:", pre_u)
+        # print("Recall of unbounded:", rec_u)
     
     # bounded records
     testb.pop('unbound')
@@ -123,16 +131,20 @@ def evaluate(test, model, bounds):
 
     predsb =  model.predict(X_y_testb)
 
-    tnb, fpb, fnb, tpb = confusion_matrix(y_testb, predsb.round()).ravel()
+    try:
+        tnb, fpb, fnb, tpb = confusion_matrix(y_testb, predsb.round()).ravel()
 
-    auc_new = (roc_auc_score(y_testb, predsb))
-    mse_new = (mean_squared_error(y_testb, predsb))
-    log_new = (log_loss(y_testb, predsb))
-    eventrate_new = np.mean(y_testb)
-    avgscore_new = np.mean(predsb)
-    pre_new = precision_score(y_testb, predsb.round())
-    rec_new = recall_score(y_testb, predsb.round())
-    fp_new = fpb/len(test0)
+        auc_new = (roc_auc_score(y_testb, predsb))
+        mse_new = (mean_squared_error(y_testb, predsb))
+        log_new = (log_loss(y_testb, predsb))
+        eventrate_new = np.mean(y_testb)
+        avgscore_new = np.mean(predsb)
+        pre_new = precision_score(y_testb, predsb.round())
+        rec_new = recall_score(y_testb, predsb.round())
+        fp_new = fpb/len(test0)
+    except:
+        print("Too many features or bad feature! No record is bound.")
+        sys.exit("Change the features for simulation")
     
     print ("AUC score:",auc_orig*100,auc_new*100, ((auc_new-auc_orig)/auc_orig)*100,"%")
     print ("Mean Squared Error:", ((mse_new-mse_orig)/mse_orig)*100,"%")
