@@ -87,9 +87,12 @@ def evaluate(test, model, bounds):
     auc_orig = (roc_auc_score(y_test0, preds0))
     mse_orig = (mean_squared_error(y_test0, preds0))
     log_orig = (log_loss(y_test0, preds0))
+    eventrate_orig = np.mean(y_test0)
+    avgscore_orig = np.mean(preds0)
     pre_orig = precision_score(y_test0, preds0.round())
+    rec_orig = recall_score(y_test0, preds0.round())
     fp_orig = fp0/len(test0)
-
+    
     test = get_result(test, bounds)
     testu = test[test['unbound']>0]
     testb = test[test['unbound']==0]
@@ -125,11 +128,19 @@ def evaluate(test, model, bounds):
     auc_new = (roc_auc_score(y_testb, predsb))
     mse_new = (mean_squared_error(y_testb, predsb))
     log_new = (log_loss(y_testb, predsb))
+    eventrate_new = np.mean(y_testb)
+    avgscore_new = np.mean(predsb)
     pre_new = precision_score(y_testb, predsb.round())
+    rec_new = recall_score(y_testb, predsb.round())
     fp_new = fpb/len(test0)
-
-    print ("AUC score:", ((auc_new-auc_orig)/auc_orig)*100,"%")
-    # print ("Mean Squared Error:", ((mse_new-mse_orig)/mse_orig)*100,"%")
-    # print ("Precision:", ((pre_new-pre_orig)/pre_orig)*100,"%")
+    
+    print ("AUC score:",auc_orig*100,auc_new*100, ((auc_new-auc_orig)/auc_orig)*100,"%")
+    print ("Mean Squared Error:", ((mse_new-mse_orig)/mse_orig)*100,"%")
+    print ("Precision:",pre_orig*100,pre_new*100, ((pre_new-pre_orig)/pre_orig)*100,"%")
+    print ("Recall:", rec_orig*100,rec_new*100,((rec_new-rec_orig)/rec_orig)*100,"%")
+    print ("Event Rate:", eventrate_orig*100,eventrate_new*100)
+    print ("Average Score:", avgscore_orig*100,avgscore_new*100)
     print ("False positive rate:", ((fp_new-fp_orig)/fp_orig)*100,"%")
     print ("Neg Log Loss:", ((log_new-log_orig)/log_orig)*100,"%")
+    print ("Percentage of records dropped:", len(testu)*100/len(test0))
+    print ("Number of records dropped:", len(testu))

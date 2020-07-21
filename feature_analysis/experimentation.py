@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 def experiment(base, model, feature):
     X_test = xgb.DMatrix(data = base)
-    base.plot(y=[feature, "out_prncp", "loan_amnt"])
     pred = pd.DataFrame(columns = [feature, 'preds'])
 
     pred[feature] = base[feature]
@@ -15,7 +14,7 @@ def experiment(base, model, feature):
     # plt.show()
     return pred
 
-def get_bounds(base, model, feature):
+def get_bounds(base, model, feature, gamma):
     df = experiment(base, model, feature)
     df['preds_diff'] = df['preds'].diff()
     indices = df.index[df['preds_diff'] != 0].tolist()
@@ -23,5 +22,10 @@ def get_bounds(base, model, feature):
     highi = indices[-1]
     low = df.at[lowi, feature]
     high = df.at[highi, feature]
+
+    diff = (high - low)
+    low -= gamma*diff
+    high += gamma*diff
+    
     bound_i = pd.Series([low, high])
     return bound_i
