@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 # Enter filenames(year+quarter) of raw files as a list
-input_files = ['16Q3'] 
+input_files = ['19Q4'] 
 
 for x in input_files:
     path = os.getcwd()

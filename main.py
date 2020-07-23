@@ -15,6 +15,7 @@ from feature_analysis.initialisation import multivar, createBase
 from feature_analysis.simulation import simulate
 from feature_analysis.experimentation import get_bounds
 import feature_analysis.evaluation as ev
+from feature_analysis.multivariate import monotone
 
 config = configparser.ConfigParser()
 config.read('configuration.ini')
@@ -65,7 +66,7 @@ if config.has_option('USER', 'features')==False:
 
 else:
     featdict = [x.strip() for x in config['USER'].get('features').split(',')]
-    featdict = [i for i in featdict if i in feat_score]
+    featdict = [i for i in featdict if i in train]
 
 print ("important features loaded")
 # check if explicit bounds provided
@@ -77,28 +78,40 @@ if config.has_option('USER', 'bounds')==False:
 
     if config.has_option('USER', 'pos_var')==True:
         poslist = [x.strip() for x in config['USER'].get('pos_var').split(',')]
-        poslist = [i for i in poslist if i in feat_score]
+        poslist = [i for i in poslist if i in train]
     
     if config.has_option('USER', 'neg_var')==True:
         neglist = [x.strip() for x in config['USER'].get('neg_var').split(',')]
-        neglist = [i for i in neglist if i in feat_score]
+        neglist = [i for i in neglist if i in train]
 
-    try:
-        base = multivar(train, poslist, neglist)
-    except:
-        print ("Error in initialisation")
-    
     bounds = pd.DataFrame()
 
-    for i in featdict:
+    if config['USER'].getfloat('delta') >= 0:
+        if len(poslist)>0 or len(neglist)>0:
+            # try:
+            #     bounds = monotone(train, model, poslist, neglist, config['USER'].getfloat('delta'))
+            # except:
+            #     sys.exit("Error in multivariate")
+
+            bounds = monotone(train, model, poslist, neglist, config['USER'].getfloat('delta'))
+        else:
+            sys.exit("Provide correct features in pos_var & neg_var OR set delta < 0")
+    
+    else:
         try:
-            based = simulate(base, train, i)
+            base = multivar(train, poslist, neglist)
         except:
-            sys.exit("Error in simulation")
-        try:
-            bounds[i] = get_bounds(based, model, i, config['USER'].getfloat('gamma'))
-        except:
-            sys.exit("Error in experimentation")
+            print ("Error in initialisation")
+
+        for i in featdict:
+            try:
+                based = simulate(base, train, i)
+            except:
+                sys.exit("Error in simulation")
+            try:
+                bounds[i] = get_bounds(based, model, i, config['USER'].getfloat('gamma'))
+            except:
+                sys.exit("Error in experimentation")
     
     # option to get boundary values
     if config['USER'].getboolean('get_bounds')==True:
@@ -127,7 +140,10 @@ if config.has_option('USER', 'test')==True:
 
     for i in eval_flags:
         if i=="eval_bound":
-            ev.eval_bound(train, model, bounds).to_excel("Boundary_evaluation.xlsx")
+            if config['USER'].getfloat('delta') < 0:
+                ev.eval_bound(train, model, bounds).to_excel("Boundary_evaluation.xlsx")
+            else:
+                print ("Boundary evaluation work in progress")
         elif i=="result":
             ev.get_result(test, bounds).to_csv("result.csv")
         elif i=="reason":
