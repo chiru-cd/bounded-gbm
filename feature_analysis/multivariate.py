@@ -8,7 +8,7 @@ def monotone(train, model, poslist, neglist, delta):
     df = pd.DataFrame()
     a = [0] * 30
     
-    varLists = [] * (len(poslist)+len(neglist))
+    varLists = [[] for x in range(len(poslist)+len(neglist))]
 
     train_copy = train.sample(n = 25000)
     for j in range (0, 30):
@@ -31,7 +31,7 @@ def monotone(train, model, poslist, neglist, delta):
             max_val = train[neglist[i]].max()
             diff = (max_val - min_val)
             new_val = max_val - ((j/10)-1)*diff
-            if 'fico' in i:
+            if 'fico' in neglist[i]:
                 if new_val < 0:
                     new_val = 0
                 if new_val > 900:
@@ -39,7 +39,8 @@ def monotone(train, model, poslist, neglist, delta):
             train_copy[neglist[i]] = new_val
             varLists[len(poslist)+i].append(new_val)
 
-        ylt = train_copy.pop('class')
+        if 'class' in train_copy:
+            ylt = train_copy.pop('class')
         # creating Dmatrix of the modified data
         X_test_lt = xgb.DMatrix(data=train_copy)
         # performing prediction on new test dataset
@@ -69,6 +70,4 @@ def monotone(train, model, poslist, neglist, delta):
         high = df.at[highi, i]
         bounds[i] = pd.Series([low, high])
 
-    print (df)
-    # df.plot()
-    # plt.show()
+    return bounds
