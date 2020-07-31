@@ -6,6 +6,7 @@ from sklearn.metrics import roc_auc_score
 
 def monotone(train, model, poslist, neglist, delta):
     df = pd.DataFrame()
+    
     a = [0] * 30
     
     varLists = [[] for x in range(len(poslist)+len(neglist))]
@@ -61,6 +62,7 @@ def monotone(train, model, poslist, neglist, delta):
     highi = indices[-1]
 
     bounds = pd.DataFrame()
+    
     for i in poslist:
         low = df.at[lowi, i]
         high = df.at[highi, i]
